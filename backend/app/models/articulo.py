@@ -7,8 +7,8 @@ class Articulo(db.Model):
     # ✅ PK real en BD
     id_articulo = db.Column(db.Integer, primary_key=True, autoincrement=True)
 
-    # ✅ FK a usuarios.id_usuario (dueño)
-    id_propietario = db.Column(
+    # ✅ FK real en BD: articulos.id_dueno -> usuarios.id_usuario
+    id_dueno = db.Column(
         db.Integer,
         db.ForeignKey("usuarios.id_usuario", ondelete="RESTRICT"),
         nullable=False,
@@ -49,9 +49,9 @@ class Articulo(db.Model):
     # Relaciones
     categoria = db.relationship("Categoria", back_populates="articulos")
 
-    propietario = db.relationship(
+    dueno = db.relationship(
         "Usuario",
-        foreign_keys=[id_propietario],
+        foreign_keys=[id_dueno],
         lazy="joined",
     )
 
@@ -112,3 +112,17 @@ class Articulo(db.Model):
     @tarifa_por_dia.setter
     def tarifa_por_dia(self, value):
         self.precio_renta_dia = value
+
+    # --- Backwards compatibility para código que todavía use "propietario" ---
+    @property
+    def id_propietario(self):
+        return self.id_dueno
+
+    @id_propietario.setter
+    def id_propietario(self, value):
+        self.id_dueno = value
+
+    @property
+    def propietario(self):
+        return self.dueno
+
