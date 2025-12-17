@@ -1,0 +1,85 @@
+<div class="page-wrapper">
+  <section class="card">
+    <div class="card-header">
+      <h2>Listado de artículos</h2>
+
+      <div class="header-actions">
+        <button class="btn-secondary" type="button" (click)="irAPerfil()">Perfil</button>
+        <button class="btn-logout" type="button" (click)="cerrarSesion()">Cerrar sesión</button>
+      </div>
+    </div>
+
+    <p class="subtitle">
+      Bienvenido 👋. Estos son los artículos disponibles para renta.
+    </p>
+
+    <div *ngIf="loading" class="state-message">
+      Cargando artículos...
+    </div>
+
+    <div *ngIf="!loading && errorMessage" class="state-message error">
+      {{ errorMessage }}
+    </div>
+
+    <div
+      *ngIf="!loading && !errorMessage && articulos.length === 0"
+      class="state-message"
+    >
+      Aún no hay artículos publicados.
+    </div>
+
+    <div
+      *ngIf="!loading && !errorMessage && articulos.length > 0"
+      class="articulos-grid"
+    >
+      <article
+        class="articulo-card"
+        *ngFor="let art of articulos"
+      >
+        <div class="imagen-wrapper">
+          <img
+            *ngIf="art.imagen_principal_url"
+            class="articulo-img"
+            [src]="art.imagen_principal_url"
+            [alt]="art.titulo"
+          />
+          <div *ngIf="!art.imagen_principal_url" class="no-image">Sin imagen</div>
+        </div>
+
+        <div class="articulo-body">
+          <h3>{{ art.titulo }}</h3>
+
+          <div class="articulo-sub">
+            <span class="ciudad" *ngIf="art.ciudad">{{ art.ciudad }}</span>
+          </div>
+
+          <div class="articulo-meta">
+            <span class="precio">
+              <ng-container *ngIf="art.precio_renta_dia && art.precio_renta_hora">
+                ${{ art.precio_renta_dia }} / día · ${{ art.precio_renta_hora }} / hora
+              </ng-container>
+              <ng-container *ngIf="art.precio_renta_dia && !art.precio_renta_hora">
+                ${{ art.precio_renta_dia }} / día
+              </ng-container>
+              <ng-container *ngIf="!art.precio_renta_dia && art.precio_renta_hora">
+                ${{ art.precio_renta_hora }} / hora
+              </ng-container>
+              <ng-container *ngIf="!art.precio_renta_dia && !art.precio_renta_hora && art.precio_base">
+                ${{ art.precio_base }} /
+                {{ art.unidad_precio === 'por_hora' ? 'hora' : (art.unidad_precio === 'por_semana' ? 'semana' : 'día') }}
+              </ng-container>
+            </span>
+          </div>
+
+          <div class="propietario" *ngIf="art.propietario_nombre">
+            Dueño: {{ art.propietario_nombre }}
+          </div>
+
+          <button class="btn-detalle" type="button" (click)="irADetalle(art)">
+            Ver detalle
+          </button>
+        </div>
+      </article>
+    </div>
+  </section>
+</div>

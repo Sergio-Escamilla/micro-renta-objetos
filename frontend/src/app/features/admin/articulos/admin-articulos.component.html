@@ -1,0 +1,78 @@
+<div class="page-wrapper">
+	<section class="card">
+		<div class="card-header">
+			<h2>Artículos</h2>
+		</div>
+
+		<nav class="admin-tabs">
+			<a routerLink="/admin" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Resumen</a>
+			<a routerLink="/admin/incidentes" routerLinkActive="active">Incidentes</a>
+			<a routerLink="/admin/usuarios" routerLinkActive="active">Usuarios</a>
+			<a routerLink="/admin/articulos" routerLinkActive="active">Artículos</a>
+			<a routerLink="/admin/puntos-entrega" routerLinkActive="active">Puntos de entrega</a>
+		</nav>
+
+		<div class="admin-filters">
+			<input
+				type="text"
+				[(ngModel)]="search"
+				placeholder="Buscar por título/descr."
+				(keydown.enter)="buscar()"
+			/>
+			<button class="btn-secondary" type="button" (click)="buscar()">Buscar</button>
+		</div>
+
+		<div *ngIf="loading" class="state-message">Cargando artículos...</div>
+		<div *ngIf="errorMessage" class="state-message error">{{ errorMessage }}</div>
+
+		<div *ngIf="!loading && data && data.items.length === 0" class="state-message">
+			No hay artículos.
+		</div>
+
+		<div *ngIf="!loading && data && data.items.length > 0" class="table-wrapper">
+			<table class="admin-table">
+				<thead>
+					<tr>
+						<th>ID</th>
+						<th>Título</th>
+						<th>Ciudad</th>
+						<th>Propietario</th>
+						<th>Publicación</th>
+						<th>Acciones</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr *ngFor="let a of data.items">
+						<td>{{ a.id_articulo }}</td>
+						<td>{{ a.titulo }}</td>
+						<td>{{ a.ciudad || '-' }}</td>
+						<td>
+							<span *ngIf="a.propietario">
+								{{ a.propietario.nombre }} {{ a.propietario.apellidos }}
+							</span>
+							<span *ngIf="!a.propietario">-</span>
+						</td>
+						<td>{{ a.estado_publicacion || '-' }}</td>
+						<td>
+							<button class="btn-secondary" type="button" (click)="verDetalle(a)">
+								Ver detalle
+							</button>
+							<button
+								class="btn-secondary"
+								type="button"
+								(click)="toggleEstado(a)"
+								[disabled]="!a.estado_publicacion || actionLoading[a.id_articulo]"
+							>
+								{{
+									a.estado_publicacion?.toLowerCase() === 'pausado'
+										? (actionLoading[a.id_articulo] ? 'Activando...' : 'Publicar')
+									: (actionLoading[a.id_articulo] ? 'Pausando...' : 'Pausar')
+								}}
+							</button>
+						</td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+	</section>
+</div>

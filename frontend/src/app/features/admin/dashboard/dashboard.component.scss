@@ -1,0 +1,61 @@
+.admin-tabs {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+	margin: 12px 0 16px;
+}
+
+@media (max-width: 420px) {
+	.admin-tabs {
+		flex-wrap: nowrap;
+		overflow-x: auto;
+		-webkit-overflow-scrolling: touch;
+		padding-bottom: 6px;
+	}
+}
+
+.admin-tabs a {
+	text-decoration: none;
+	padding: 8px 10px;
+	border-radius: 999px;
+	border: 1px solid var(--border);
+	background: var(--surface-1);
+	color: var(--text);
+	font-weight: 700;
+}
+
+.admin-tabs a.active {
+	border-color: var(--primary);
+}
+
+.admin-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+	gap: 12px;
+}
+
+@media (max-width: 420px) {
+	.admin-grid {
+		grid-template-columns: 1fr;
+	}
+}
+
+.admin-metric {
+	border: 1px solid var(--border);
+	border-radius: var(--radius-md);
+	background: var(--surface-1);
+	padding: 12px;
+}
+
+.admin-metric .label {
+	font-size: 12px;
+	color: var(--muted);
+	font-weight: 700;
+}
+
+.admin-metric .value {
+	font-size: 24px;
+	font-weight: 700;
+	color: var(--text);
+	margin-top: 4px;
+}

@@ -1,0 +1,415 @@
+<div class="page-wrapper">
+  <section class="card">
+    <div class="card-header">
+      <button class="btn-secondary" type="button" (click)="volverExplorar()">Volver a explorar</button>
+      <h2>Resumen de renta</h2>
+      <div class="spacer"></div>
+    </div>
+
+    <div *ngIf="loading" class="state-message">Cargando resumen...</div>
+
+    <div *ngIf="!loading && errorMessage" class="state-message error">
+      {{ errorMessage }}
+    </div>
+
+    <div *ngIf="!loading && successMessage" class="state-message">
+      {{ successMessage }}
+    </div>
+
+    <div *ngIf="!loading && paying" class="state-message">
+      <span class="spinner" aria-hidden="true"></span>
+      {{ processingMessage || 'Procesando pago...' }}
+    </div>
+
+    <div *ngIf="toastMessage" class="toast" [class.toast-success]="toastType === 'success'" [class.toast-error]="toastType === 'error'">
+      {{ toastMessage }}
+    </div>
+
+    <ng-container *ngIf="!loading && !errorMessage && renta">
+      <div *ngIf="esExpirada" class="state-message">
+        <strong>Reserva expirada.</strong> El tiempo para pagar terminó.
+      </div>
+
+      <div *ngIf="renta.reembolso_simulado" class="state-message">
+        Reembolso simulado: <strong>${{ renta.monto_reembolso || 0 }}</strong>
+      </div>
+
+      <div class="resumen">
+        <div class="titulo">
+          {{ renta.articulo?.titulo || 'Artículo' }}
+          <span class="badge">{{ renta.estado_renta }}</span>
+        </div>
+        <div class="meta">
+          <div><strong>Modalidad:</strong> {{ renta.modalidad || 'dias' }}</div>
+          <div><strong>Unidades:</strong> {{ renta.cantidad_unidades ?? '-' }}</div>
+        </div>
+
+        <div class="meta">
+          <div><strong>Inicio:</strong> {{ renta.fecha_inicio | date: 'medium' }}</div>
+          <div><strong>Fin:</strong> {{ renta.fecha_fin | date: 'medium' }}</div>
+        </div>
+
+        <div class="totales">
+          <div class="total"><strong>Subtotal renta:</strong> ${{ subtotal }}</div>
+          <div class="deposito"><strong>Depósito:</strong> ${{ deposito }}</div>
+          <div class="total"><strong>Total:</strong> ${{ total }}</div>
+          <div class="sub"><strong>{{ depositoMensaje }}</strong></div>
+        </div>
+      </div>
+
+      <div class="incidente">
+        <div class="timeline-title">Entrega y devolución</div>
+
+        <div class="state-message">
+          <div><strong>Modo:</strong> {{ renta.modo_entrega || 'arrendador' }}</div>
+				<div>
+					<strong>Entrega:</strong>
+					{{ (renta.entrega_modo || 'domicilio') === 'punto_entrega' ? 'Punto seguro' : 'Domicilio' }}
+				</div>
+				<div *ngIf="renta.punto_entrega?.nombre"><strong>Punto seguro:</strong> {{ renta.punto_entrega?.nombre }}</div>
+				<div *ngIf="renta.punto_entrega?.direccion"><strong>Dirección (aprox):</strong> {{ renta.punto_entrega?.direccion }}</div>
+          <div><strong>Zona pública:</strong> {{ renta.zona_publica || '-' }}</div>
+          <div *ngIf="renta.direccion_entrega_visible"><strong>Dirección exacta:</strong> {{ renta.direccion_entrega || '-' }}</div>
+          <div *ngIf="!renta.direccion_entrega_visible"><strong>Dirección exacta:</strong> (oculta hasta post-pago)</div>
+        </div>
+
+        <div *ngIf="soyDueno" class="state-message">
+          <div><strong>Proponer / actualizar</strong></div>
+          <label>Modo de entrega</label>
+          <select [formControl]="modoEntregaControl">
+            <option value="arrendador">Arrendador (default)</option>
+            <option value="neutral">Neutral (punto público)</option>
+          </select>
+
+        <label>Entrega</label>
+        <select [formControl]="entregaModoControl">
+          <option value="domicilio">Domicilio (dirección exacta post-pago)</option>
+          <option value="punto_entrega">Punto seguro (catálogo)</option>
+        </select>
+
+        <div *ngIf="esEntregaEnPuntoSeguro">
+          <label>Buscar punto seguro</label>
+          <input type="text" [formControl]="puntoEntregaFiltroControl" placeholder="Buscar por nombre o dirección" />
+
+          <label>Punto seguro</label>
+          <select [formControl]="puntoEntregaIdControl">
+            <option value="">(elige un punto)</option>
+            <option *ngFor="let p of puntosEntregaFiltrados" [value]="p.id">
+              {{ p.nombre }}{{ p.direccion ? ' — ' + p.direccion : '' }}
+            </option>
+          </select>
+
+          <div class="state-message" *ngIf="puntosEntregaLoading">Cargando puntos seguros...</div>
+          <div class="state-message error" *ngIf="!puntosEntregaLoading && puntosEntregaError">{{ puntosEntregaError }}</div>
+        </div>
+
+        <div *ngIf="!esEntregaEnPuntoSeguro">
+          <label>Zona pública (visible antes de pagar)</label>
+          <input type="text" [formControl]="zonaPublicaControl" placeholder="Colonia / CP / referencia general" />
+        </div>
+
+        <div *ngIf="!esEntregaEnPuntoSeguro">
+          <label>Dirección exacta (visible solo post-pago)</label>
+          <textarea
+            rows="2"
+            [formControl]="direccionEntregaControl"
+            placeholder="Calle, número, referencias..."
+          ></textarea>
+        </div>
+
+          <label>Ventanas de entrega (2–3, una por línea)</label>
+          <textarea rows="3" [formControl]="ventanasEntregaControl" placeholder="Ej: Lun 10-12\nMar 16-18"></textarea>
+
+          <label>Ventanas de devolución (2–3, una por línea)</label>
+          <textarea rows="3" [formControl]="ventanasDevolucionControl" placeholder="Ej: Vie 10-12\nSab 16-18"></textarea>
+
+          <button class="btn-primary" type="button" (click)="guardarCoordinacion()" [disabled]="uiBloqueada">
+            Guardar coordinación
+          </button>
+
+          <button class="btn-primary" type="button" (click)="confirmarCoordinacion()" [disabled]="!puedeConfirmarCoordinacion">
+            Confirmar coordinación
+          </button>
+        </div>
+
+        <div *ngIf="soyArrendatario" class="state-message">
+          <div><strong>Elegir ventanas</strong></div>
+
+          <label>Entrega</label>
+          <select [formControl]="ventanaEntregaElegidaControl">
+            <option value="">(elige una opción)</option>
+            <option *ngFor="let w of ventanasEntregaOpciones" [value]="w">{{ w }}</option>
+          </select>
+
+          <label>Devolución</label>
+          <select [formControl]="ventanaDevolucionElegidaControl">
+            <option value="">(elige una opción)</option>
+            <option *ngFor="let w of ventanasDevolucionOpciones" [value]="w">{{ w }}</option>
+          </select>
+
+          <button class="btn-primary" type="button" (click)="aceptarCoordinacion()" [disabled]="uiBloqueada">
+            Aceptar coordinación
+          </button>
+
+          <div class="state-message" *ngIf="renta.ventana_entrega_elegida || renta.ventana_devolucion_elegida">
+            <div><strong>Elegiste:</strong></div>
+            <div>Entrega: {{ renta.ventana_entrega_elegida || '-' }}</div>
+            <div>Devolución: {{ renta.ventana_devolucion_elegida || '-' }}</div>
+            <div><strong>Confirmada:</strong> {{ renta.coordinacion_confirmada ? 'Sí' : 'No' }}</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="incidente" *ngIf="chatVisible" id="chat">
+        <div class="timeline-title">Chat de la renta</div>
+        <div class="state-message">
+          Solo texto corto. Sin links, sin teléfonos.
+        </div>
+
+        <div #chatScroll style="max-height: 220px; overflow: auto; padding: 8px;">
+          <div *ngIf="chatMessages.length === 0" class="state-message">Sin mensajes.</div>
+          <div *ngFor="let m of chatMessages" class="state-message" [class.error]="m.id_emisor !== userId">
+            <strong>{{ m.id_emisor === userId ? 'Tú' : 'Otro' }}:</strong> {{ m.mensaje }}
+          </div>
+        </div>
+
+        <input type="text" [formControl]="chatInputControl" placeholder="Escribe un mensaje..." [disabled]="!puedeEnviarChat" />
+        <button class="btn-primary" type="button" (click)="enviarChat()" [disabled]="!puedeEnviarChat">
+          Enviar
+        </button>
+      </div>
+
+      <div class="incidente" *ngIf="soyArrendatario && (renta.codigo_entrega || renta.codigo_devolucion)">
+        <div class="timeline-title">Tus códigos (OTP)</div>
+        <div class="state-message">
+          Entrega: <strong>{{ renta.codigo_entrega || '—' }}</strong>
+        </div>
+        <div class="state-message">
+          Devolución: <strong>{{ renta.codigo_devolucion || '—' }}</strong>
+        </div>
+      </div>
+
+      <div class="incidente" *ngIf="soyDueno && (puedeConfirmarEntregaOtp || puedeConfirmarDevolucionOtp)">
+        <div class="timeline-title">Confirmación por OTP (dueño)</div>
+
+        <div *ngIf="puedeConfirmarEntregaOtp" class="state-message">
+          <div><strong>Confirmar entrega</strong></div>
+          <label>Código de entrega</label>
+          <input type="text" [formControl]="otpEntregaControl" placeholder="6 dígitos" />
+          <label>Checklist (opcional)</label>
+          <textarea rows="2" [formControl]="checklistEntregaControl" placeholder="Estado, accesorios, notas..."></textarea>
+          <button class="btn-primary" type="button" (click)="confirmarEntregaOtp()" [disabled]="uiBloqueada">
+            Confirmar entrega
+          </button>
+        </div>
+
+        <div *ngIf="puedeConfirmarDevolucionOtp" class="state-message">
+          <div><strong>Confirmar devolución</strong></div>
+          <label>Código de devolución</label>
+          <input type="text" [formControl]="otpDevolucionControl" placeholder="6 dígitos" />
+          <label>Checklist (opcional)</label>
+          <textarea rows="2" [formControl]="checklistDevolucionControl" placeholder="Estado, accesorios, notas..."></textarea>
+          <button class="btn-primary" type="button" (click)="confirmarDevolucionOtp()" [disabled]="uiBloqueada">
+            Confirmar devolución
+          </button>
+        </div>
+      </div>
+
+      <div class="timeline" *ngIf="timeline.length > 0">
+        <div class="timeline-title">Historial</div>
+        <div class="timeline-item" *ngFor="let t of timeline" [class.done]="t.done" [class.alert]="t.key === 'incidente' && renta.estado_renta === 'incidente'">
+          <div class="dot"></div>
+          <div class="line"></div>
+          <div class="content">
+            <div class="label">{{ t.label }}</div>
+            <div class="date" *ngIf="t.date">{{ t.date | date: 'short' }}</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button
+			*ngIf="puedePagarAhoraUi"
+          class="btn-primary"
+          type="button"
+          (click)="pagarAhora()"
+          [disabled]="paying"
+        >
+          {{ paying ? 'Procesando pago...' : 'Pagar ahora' }}
+        </button>
+
+			<button
+				*ngIf="puedeDescargarRecibo"
+				class="btn-secondary"
+				type="button"
+				(click)="descargarRecibo()"
+				[disabled]="downloadingRecibo"
+			>
+				<span *ngIf="downloadingRecibo" class="spinner" aria-hidden="true"></span>
+				{{ downloadingRecibo ? 'Descargando...' : 'Descargar recibo' }}
+			</button>
+
+        <button
+          *ngIf="puedeCancelar"
+          class="btn-secondary"
+          type="button"
+          (click)="toggleCancelar()"
+          [disabled]="paying"
+        >
+          {{ showCancelar ? 'Cancelar acción' : 'Cancelar renta' }}
+        </button>
+
+        <button
+			*ngIf="puedeConfirmarEntregaUi"
+          class="btn-primary"
+          type="button"
+          (click)="confirmarEntrega()"
+          [disabled]="paying"
+        >
+          Confirmar entrega
+        </button>
+
+        <button
+			*ngIf="puedeMarcarEnUsoUi"
+          class="btn-primary"
+          type="button"
+          (click)="marcarEnUso()"
+          [disabled]="paying"
+        >
+          Marcar en uso
+        </button>
+
+        <button
+			*ngIf="puedeDevolverUi"
+          class="btn-primary"
+          type="button"
+          (click)="devolver()"
+          [disabled]="paying"
+        >
+          Devolver
+        </button>
+
+        <button
+			*ngIf="puedeFinalizarUi"
+          class="btn-primary"
+          type="button"
+          (click)="finalizar()"
+          [disabled]="paying"
+        >
+          Finalizar (liberar depósito)
+        </button>
+
+        <button
+			*ngIf="puedeReportarIncidenteUi"
+          class="btn-secondary"
+          type="button"
+          (click)="toggleIncidente()"
+          [disabled]="paying"
+        >
+          {{ showIncidente ? 'Cancelar incidente' : 'Reportar incidente' }}
+        </button>
+
+        <button class="btn-secondary" type="button" (click)="volverExplorar()" [disabled]="paying">
+          Volver a explorar
+        </button>
+        <button class="btn-secondary" type="button" (click)="irMisRentas()" [disabled]="paying">
+          Ir a mis rentas
+        </button>
+      </div>
+
+      <div *ngIf="showCancelar && puedeCancelar" class="incidente">
+        <div class="timeline-title">Cancelar renta</div>
+        <div class="state-message">
+          Esta acción es irreversible.
+          <span *ngIf="soyDueno"> El dueño debe indicar un motivo.</span>
+        </div>
+
+        <label>Motivo (opcional)</label>
+        <textarea rows="3" [formControl]="cancelarMotivoControl" placeholder="Motivo..."></textarea>
+        <button class="btn-primary" type="button" (click)="confirmarCancelar()" [disabled]="paying">
+          Confirmar cancelación
+        </button>
+      </div>
+
+      <div *ngIf="showIncidente" class="incidente">
+        <label>Describe el incidente</label>
+        <textarea rows="3" [formControl]="incidenteControl" placeholder="¿Qué ocurrió?"></textarea>
+        <button class="btn-primary" type="button" (click)="enviarIncidente()" [disabled]="paying">
+          Enviar
+        </button>
+      </div>
+
+      <div *ngIf="renta.estado_renta === 'incidente'" class="incidente">
+        <div class="timeline-title">Incidente</div>
+        <div class="state-message">
+          {{ renta.incidente?.descripcion || 'Incidente reportado.' }}
+        </div>
+
+        <div *ngIf="puedoResolverIncidente" class="state-message">
+          <div><strong>Resolver:</strong></div>
+          <label>
+            <input type="radio" [formControl]="resolverDecisionControl" value="liberar" />
+            Liberar depósito
+          </label>
+          <label>
+            <input type="radio" [formControl]="resolverDecisionControl" value="retener_parcial" />
+            Retener parcial
+          </label>
+          <label>
+            <input type="radio" [formControl]="resolverDecisionControl" value="retener_total" />
+            Retener total
+          </label>
+
+          <div *ngIf="resolverDecisionControl.value === 'retener_parcial'" style="margin-top: 8px;">
+            <label>Monto retenido</label>
+            <input type="number" [formControl]="resolverMontoControl" placeholder="0" />
+          </div>
+
+          <div style="margin-top: 8px;">
+            <label>Nota</label>
+            <textarea rows="2" [formControl]="resolverNotaControl" placeholder="Detalle de la decisión"></textarea>
+			<div class="hint" *ngIf="resolverDecisionControl.value !== 'liberar'">Obligatoria si retienes total/parcial.</div>
+          </div>
+
+          <button class="btn-primary" type="button" (click)="resolverIncidente()" [disabled]="paying">
+            Resolver incidente
+          </button>
+        </div>
+      </div>
+
+    <div *ngIf="renta.estado_renta === 'finalizada' && renta.incidente?.decision" class="incidente">
+      <div class="timeline-title">Incidente resuelto</div>
+      <div class="state-message">
+        Decisión: <strong>{{ incidenteDecisionLabel(renta.incidente?.decision) }}</strong>
+        <span *ngIf="renta.incidente?.monto_retenido != null">
+          · Retenido: <strong>{{ formatMoney(renta.incidente?.monto_retenido) }}</strong>
+        </span>
+      </div>
+      <div class="state-message" *ngIf="renta.incidente?.nota">
+        <strong>Nota:</strong> {{ renta.incidente?.nota }}
+      </div>
+    </div>
+
+      <div *ngIf="renta.estado_renta === 'finalizada' && (soyArrendatario || soyDueno) && ratingSupported === true && !miCalificacion" class="incidente">
+        <div class="timeline-title">Calificar</div>
+
+        <div class="stars" role="group" aria-label="Calificación">
+          <button type="button" class="star" [class.active]="estrellas >= 1" (click)="onSelectEstrellas(1)">★</button>
+          <button type="button" class="star" [class.active]="estrellas >= 2" (click)="onSelectEstrellas(2)">★</button>
+          <button type="button" class="star" [class.active]="estrellas >= 3" (click)="onSelectEstrellas(3)">★</button>
+          <button type="button" class="star" [class.active]="estrellas >= 4" (click)="onSelectEstrellas(4)">★</button>
+          <button type="button" class="star" [class.active]="estrellas >= 5" (click)="onSelectEstrellas(5)">★</button>
+        </div>
+
+        <textarea rows="2" [formControl]="comentarioControl" placeholder="Comentario (opcional)"></textarea>
+        <button class="btn-primary" type="button" (click)="enviarCalificacion()" [disabled]="paying">
+          Enviar calificación
+        </button>
+      </div>
+
+      <div *ngIf="renta.estado_renta === 'finalizada' && (soyArrendatario || soyDueno) && miCalificacion" class="state-message">
+        Ya calificaste esta renta: <strong>{{ miCalificacion.rating }}</strong> / 5.
+      </div>
+    </ng-container>
+  </section>
+</div>

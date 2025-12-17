@@ -1,0 +1,39 @@
+<header *ngIf="!esAuthScreen" class="app-nav">
+  <div class="app-nav__inner">
+    <button
+      type="button"
+      class="nav-burger"
+      (click)="toggleMobileMenu()"
+      [attr.aria-expanded]="mobileMenuOpen"
+      aria-label="Abrir menú"
+    >
+      <span class="nav-burger__bar" aria-hidden="true"></span>
+      <span class="nav-burger__bar" aria-hidden="true"></span>
+      <span class="nav-burger__bar" aria-hidden="true"></span>
+    </button>
+
+    <a class="brand" routerLink="/" (click)="cerrarMobileMenu()">
+      <img src="assets/brand/logo_renta.jpg" alt="DentalCare" class="brand-logo" />
+    </a>
+
+    <div class="spacer"></div>
+
+    <nav class="nav" [class.open]="mobileMenuOpen">
+      <ng-container *ngIf="authService.isAuthenticated(); else guestLinks">
+        <a class="nav-link" routerLink="/explorar" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" (click)="cerrarMobileMenu()">Explorar</a>
+        <a class="nav-link" routerLink="/inbox" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" (click)="cerrarMobileMenu()">
+          Bandeja
+          <span *ngIf="badgeCount > 0" class="nav-badge">{{ badgeCount }}</span>
+        </a>
+      <a *ngIf="!esAdmin" class="nav-link nav-cta" routerLink="/articulos/publicar" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" (click)="cerrarMobileMenu()">Publicar</a>
+        <a class="nav-link" routerLink="/perfil" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" (click)="cerrarMobileMenu()">Perfil</a>
+        <a *ngIf="esAdmin" class="nav-link" routerLink="/admin" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" (click)="cerrarMobileMenu()">Admin</a>
+      </ng-container>
+      <ng-template #guestLinks>
+        <a class="nav-link" routerLink="/explorar" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" (click)="cerrarMobileMenu()">Explorar</a>
+      </ng-template>
+    </nav>
+  </div>
+</header>
+
+<router-outlet></router-outlet>

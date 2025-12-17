@@ -1,0 +1,37 @@
+<div class="page-wrapper">
+  <section class="card">
+    <div class="card-header">
+      <button class="btn-secondary" type="button" (click)="volverExplorar()">Volver a explorar</button>
+      <h2>Mis rentas</h2>
+      <div class="spacer"></div>
+    </div>
+
+    <div *ngIf="loading" class="state-message">Cargando...</div>
+    <div *ngIf="!loading && errorMessage" class="state-message error">{{ errorMessage }}</div>
+
+    <div *ngIf="!loading && !errorMessage && rentas.length === 0" class="state-message">
+      Aún no tienes rentas.
+    </div>
+
+    <div *ngIf="!loading && !errorMessage && rentas.length > 0" class="lista">
+      <article class="item" *ngFor="let r of rentas">
+        <div class="left">
+          <div class="titulo">{{ r.articulo?.titulo || 'Artículo' }}</div>
+          <div class="sub">
+            {{ r.fecha_inicio | date: 'short' }} → {{ r.fecha_fin | date: 'short' }}
+          </div>
+          <div class="sub">
+            <span class="badge">{{ r.estado_renta }}</span>
+            · Total: ${{ r.precio_total_renta }}
+          </div>
+        </div>
+
+        <div class="right">
+          <button class="btn-secondary" type="button" (click)="verResumen(r)">
+            Ver resumen
+          </button>
+        </div>
+      </article>
+    </div>
+  </section>
+</div>

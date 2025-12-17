@@ -1,0 +1,23 @@
+# Python
+backend/venv/
+backend/__pycache__/
+backend/.pytest_cache/
+**/__pycache__/
+**/*.pyc
+
+# Env
+backend/.env
+frontend/.env
+
+# Node / Angular
+frontend/node_modules/
+frontend/dist/
+**/node_modules/
+**/dist/
+
+# VSCode
+.vscode/
+
+# Misc
+.DS_Store
+*.log

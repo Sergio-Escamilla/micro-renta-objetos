@@ -1,0 +1,143 @@
+.resumen {
+  display: grid;
+  gap: 12px;
+	padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface-2);
+	margin-bottom: 12px;
+}
+
+.titulo {
+  font-size: 18px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.meta {
+  display: grid;
+  gap: 6px;
+}
+
+.totales {
+  display: grid;
+  gap: 6px;
+}
+
+.sub {
+  opacity: 0.9;
+  font-size: 14px;
+}
+
+.actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 12px;
+  flex-wrap: wrap;
+}
+
+.incidente {
+  margin-top: 12px;
+  display: grid;
+  gap: 8px;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface-2);
+}
+
+.incidente textarea {
+  width: 100%;
+  resize: vertical;
+}
+
+.timeline {
+  margin-top: 12px;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface-2);
+}
+
+.timeline-title {
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.timeline-item {
+  display: grid;
+  grid-template-columns: 14px 1fr;
+  column-gap: 10px;
+  position: relative;
+  padding: 6px 0;
+	opacity: 0.75;
+}
+
+.timeline-item.done {
+  opacity: 1;
+}
+
+.timeline-item.alert {
+  opacity: 1;
+}
+
+.dot {
+  width: 10px;
+  height: 10px;
+  margin-top: 3px;
+  border-radius: 50%;
+	border: 2px solid var(--border-strong);
+}
+
+.timeline-item.done .dot {
+	border-color: rgba(20, 184, 166, 0.75);
+}
+
+.timeline-item.alert .dot {
+	border-color: rgba(239, 68, 68, 0.75);
+}
+
+.line {
+  position: absolute;
+  left: 5px;
+  top: 18px;
+  bottom: -6px;
+  width: 2px;
+	background: var(--border);
+}
+
+.timeline-item:last-child .line {
+  display: none;
+}
+
+.label {
+  font-weight: 600;
+}
+
+.date {
+  font-size: 12px;
+  opacity: 0.85;
+}
+
+.stars {
+  display: inline-flex;
+  gap: 6px;
+}
+
+.star {
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  border-radius: var(--radius-sm);
+  width: 34px;
+  height: 34px;
+  font-size: 18px;
+  line-height: 1;
+}
+
+.star.active {
+	border-color: rgba(20, 184, 166, 0.40);
+	background: rgba(20, 184, 166, 0.12);
+}

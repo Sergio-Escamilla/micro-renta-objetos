@@ -1,0 +1,134 @@
+<div class="page-wrapper">
+  <section class="card">
+    <div class="card-header">
+      <button class="btn-secondary" type="button" (click)="volverDetalle()">Volver</button>
+      <h2>Rentar</h2>
+      <div class="spacer"></div>
+    </div>
+
+  <ng-container *ngIf="adminBlocked">
+    <div class="state-message error">
+      Acción no disponible para administradores.
+      <div class="actions">
+        <button class="btn-secondary" type="button" (click)="irAExplorar()">Volver a Explorar</button>
+      </div>
+    </div>
+  </ng-container>
+
+  <ng-container *ngIf="!adminBlocked">
+
+    <div *ngIf="loading" class="state-message">Cargando...</div>
+    <div *ngIf="!loading && errorMessage" class="state-message error">
+      {{ errorMessage }}
+    </div>
+
+    <!-- Modal gating: perfil incompleto / correo no verificado -->
+    <div class="modal-backdrop" *ngIf="gateOpen" (click)="cerrarGateModal()"></div>
+    <div class="modal" *ngIf="gateOpen" role="dialog" aria-modal="true">
+      <div class="modal-card">
+        <div class="modal-head">
+          <h3>Antes de rentar</h3>
+          <button class="btn-secondary" type="button" (click)="cerrarGateModal()">Cerrar</button>
+        </div>
+
+        <p class="modal-sub">Completa estos requisitos para continuar:</p>
+
+        <div class="checklist">
+          <div class="check" [class.done]="gateMissing.indexOf('correo_verificado') === -1">
+            Correo verificado
+          </div>
+          <div class="check" [class.done]="gateMissing.indexOf('telefono') === -1">
+            Teléfono
+          </div>
+          <div class="check" [class.done]="gateMissing.indexOf('ubicacion') === -1">
+            Ubicación (ciudad/estado/país)
+          </div>
+        </div>
+
+        <div class="modal-actions">
+          <button class="btn-secondary" type="button" (click)="gateIrAPerfil()">Ir a Perfil</button>
+          <button
+            class="btn-primary"
+            type="button"
+            [disabled]="gateSendingVerification || gateMissing.indexOf('correo_verificado') === -1"
+            (click)="gateEnviarVerificacion()"
+          >
+            {{ gateSendingVerification ? 'Enviando...' : 'Enviar verificación' }}
+          </button>
+        </div>
+
+        <div class="state-message" *ngIf="gateMessage">{{ gateMessage }}</div>
+      </div>
+    </div>
+
+    <ng-container *ngIf="!loading && articulo">
+      <div class="resumen">
+        <div class="titulo">{{ articulo.titulo }}</div>
+      <div class="precio" *ngIf="permiteDias || permiteHoras; else soloBase">
+        ${{ (modalidad === 'horas' ? (articulo.precio_renta_hora ?? articulo.precio_base) : (articulo.precio_renta_dia ?? articulo.precio_base)) }} /
+        {{ modalidad === 'horas' ? 'hora' : 'día' }}
+      </div>
+      <ng-template #soloBase>
+        <div class="precio">
+          ${{ articulo.precio_base }} /
+          {{ articulo.unidad_precio === 'por_hora' ? 'hora' : (articulo.unidad_precio === 'por_semana' ? 'semana' : 'día') }}
+        </div>
+      </ng-template>
+      </div>
+
+      <div *ngIf="ocupacion.length > 0" class="state-message">
+        <strong>No disponible en:</strong>
+        <div *ngFor="let o of ocupacion">{{ o.inicio }} → {{ o.fin }}</div>
+      </div>
+
+      <div class="state-message">
+        La entrega/devolución se coordina después del pago.
+      </div>
+
+      <div *ngIf="esMio" class="state-message error">
+        No puedes rentar tu propio artículo.
+      </div>
+
+      <form class="form" [formGroup]="form" (ngSubmit)="confirmarRenta()">
+        <div class="form-grid">
+          <div class="form-row">
+            <label>Inicio</label>
+            <input
+              type="datetime-local"
+              formControlName="fecha_inicio"
+              [attr.step]="modalidad === 'horas' ? 3600 : 60"
+            />
+          </div>
+          <div class="form-row">
+            <label>Fin</label>
+            <input
+              type="datetime-local"
+              formControlName="fecha_fin"
+              [attr.step]="modalidad === 'horas' ? 3600 : 60"
+            />
+          </div>
+          <div class="form-row">
+            <label>Modalidad</label>
+            <select
+              [value]="modalidad"
+              (change)="onModalidadChange($any($event.target).value)"
+              [disabled]="loading"
+            >
+              <option value="dias" [disabled]="!permiteDias">Días</option>
+              <option value="horas" [disabled]="!permiteHoras">Horas</option>
+            </select>
+            <div class="hint" *ngIf="!permiteDias || !permiteHoras">
+              <span *ngIf="!permiteDias">No disponible por día.</span>
+              <span *ngIf="!permiteHoras">No disponible por hora.</span>
+            </div>
+          </div>
+        </div>
+
+        <button class="btn-primary" type="submit" [disabled]="loading || esMio">
+          {{ loading ? 'Creando...' : 'Confirmar renta' }}
+        </button>
+      </form>
+    </ng-container>
+	</ng-container>
+  </section>
+</div>

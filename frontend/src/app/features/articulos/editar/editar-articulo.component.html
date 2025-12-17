@@ -1,0 +1,131 @@
+<div class="page">
+	<div class="container">
+		<div class="card">
+			<div class="header">
+				<h1 class="title">Editar artículo</h1>
+				<p class="subtitle">Actualiza los datos de tu publicación (las fotos no se modifican).</p>
+			</div>
+
+			<div *ngIf="loading" class="loading">Cargando…</div>
+			<div *ngIf="!loading && errorMessage" class="alert alert--error">{{ errorMessage }}</div>
+
+			<form *ngIf="!loading && articulo" class="form" [formGroup]="form" (ngSubmit)="guardar()">
+				<div class="field">
+					<label class="label">Título</label>
+					<input class="input" type="text" formControlName="titulo" placeholder="Ej. Taladro inalámbrico" />
+					<div class="hint" *ngIf="form.controls.titulo.touched && form.controls.titulo.invalid">
+						Ingresa un título válido.
+					</div>
+				</div>
+
+				<div class="field">
+					<label class="label">Descripción</label>
+					<textarea class="textarea" rows="5" formControlName="descripcion" placeholder="Describe el estado, accesorios, reglas…"></textarea>
+					<div class="hint" *ngIf="form.controls.descripcion.touched && form.controls.descripcion.invalid">
+						Ingresa una descripción válida.
+					</div>
+				</div>
+
+				<div class="grid">
+					<div class="field">
+						<label class="label">Estado de publicación</label>
+						<select class="select" formControlName="estado_publicacion">
+							<option value="publicado">Publicado</option>
+							<option value="pausado">Pausado</option>
+						</select>
+					</div>
+
+					<div class="field">
+						<label class="label">Depósito (garantía)</label>
+						<input class="input" type="number" min="0" step="1" formControlName="deposito_garantia" />
+					</div>
+				</div>
+
+				<div class="section">
+					<div class="section__title">Modalidad y precios</div>
+
+					<div class="toggle-row">
+						<label class="checkbox">
+							<input type="checkbox" formControlName="rentar_por_dias" />
+							<span>Por días</span>
+						</label>
+						<label class="checkbox">
+							<input type="checkbox" formControlName="rentar_por_horas" />
+							<span>Por horas</span>
+						</label>
+					</div>
+
+					<div class="grid">
+						<div class="field">
+							<label class="label">Precio por día</label>
+							<input class="input" type="number" min="0" step="1" formControlName="precio_renta_dia" [disabled]="!form.value.rentar_por_dias" />
+						</div>
+						<div class="field">
+							<label class="label">Precio por hora</label>
+							<input class="input" type="number" min="0" step="1" formControlName="precio_renta_hora" [disabled]="!form.value.rentar_por_horas" />
+						</div>
+					</div>
+
+					<div class="hint">
+						Debes dejar al menos una modalidad activa con precio mayor a 0.
+					</div>
+					<div class="hint" *ngIf="form.value.rentar_por_dias && form.value.rentar_por_horas">
+						Nota: tu base actual solo guarda 1 modalidad por artículo.
+					</div>
+				</div>
+
+				<div class="section">
+					<div class="section__title">Fotos</div>
+					<p class="hint">Puedes agregar, eliminar, reordenar y elegir portada.</p>
+
+					<div class="photo-actions">
+						<input class="file" type="file" accept="image/*" multiple (change)="onFilesSelected($event)" />
+						<button class="btn btn--primary" type="button" (click)="agregarFotos()" [disabled]="uploadingFotos || saving">
+							{{ uploadingFotos ? 'Subiendo…' : 'Agregar' }}
+						</button>
+						<span class="hint" *ngIf="selectedFiles.length">{{ selectedFiles.length }} seleccionada(s)</span>
+					</div>
+
+					<div *ngIf="imagenesOrdenadas.length === 0" class="hint">
+						Este artículo aún no tiene fotos.
+					</div>
+
+					<div class="photo-grid" *ngIf="imagenesOrdenadas.length > 0">
+						<div class="photo" *ngFor="let img of imagenesOrdenadas; let idx = index">
+							<div class="photo__frame">
+								<img class="photo__img" [src]="img.url_imagen" alt="Foto" />
+								<span *ngIf="img.es_principal" class="photo__badge">Portada</span>
+							</div>
+
+							<div class="photo__buttons">
+								<button class="btn btn--ghost" type="button" (click)="moverFoto(img.id!, 'up')" [disabled]="reordering || idx === 0">
+									↑
+								</button>
+								<button class="btn btn--ghost" type="button" (click)="moverFoto(img.id!, 'down')" [disabled]="reordering || idx === imagenesOrdenadas.length - 1">
+									↓
+								</button>
+								<button class="btn btn--ghost" type="button" (click)="hacerPortada(img)" [disabled]="workingImagenId === img.id || img.es_principal">
+									Portada
+								</button>
+								<button class="btn btn--ghost danger" type="button" (click)="eliminarFoto(img)" [disabled]="workingImagenId === img.id">
+									Eliminar
+								</button>
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<div class="actions">
+					<button class="btn btn--ghost" type="button" (click)="volver()" [disabled]="saving">
+						Volver
+					</button>
+					<button class="btn btn--primary" type="submit" [disabled]="saving">
+						{{ saving ? 'Guardando…' : 'Guardar cambios' }}
+					</button>
+				</div>
+			</form>
+		</div>
+	</div>
+</div>
+
+<div *ngIf="toastMessage" class="toast" [ngClass]="'toast--' + toastType">{{ toastMessage }}</div>

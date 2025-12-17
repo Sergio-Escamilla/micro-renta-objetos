@@ -1,0 +1,34 @@
+<div class="page-wrapper">
+  <section class="card home-hero">
+    <div class="hero-content">
+      <div class="kicker">Micro Renta</div>
+      <h1>Renta objetos entre personas, fácil y seguro.</h1>
+      <p class="lead">
+        Publica, renta y coordina entregas con un flujo realista: pagos simulados, OTP y notificaciones.
+      </p>
+
+      <div class="actions">
+        <button *ngIf="!isLoggedIn" class="btn-primary" type="button" (click)="irALogin()">
+          Iniciar sesión
+        </button>
+        <button *ngIf="!isLoggedIn" class="btn-secondary" type="button" (click)="irARegistro()">
+          Crear cuenta
+        </button>
+
+        <button *ngIf="isLoggedIn" class="btn-primary" type="button" (click)="irAExplorar()">
+          Explorar artículos
+        </button>
+      </div>
+    </div>
+
+    <div class="hero-card">
+      <div class="hero-card-title">¿Qué puedes hacer?</div>
+      <ul class="hero-list">
+        <li>Explorar artículos y ver disponibilidad</li>
+        <li>Rentar por días (y por horas cuando aplique)</li>
+        <li>Chatear en la renta y recibir notificaciones</li>
+        <li>Descargar recibo cuando la renta está pagada</li>
+      </ul>
+    </div>
+  </section>
+</div>

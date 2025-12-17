@@ -1,0 +1,20 @@
+<div class="page-wrapper">
+  <section class="card">
+    <div class="card-header">
+      <h2>Verificar correo</h2>
+      <div class="spacer"></div>
+    </div>
+
+    <div *ngIf="loading" class="state-message">Verificando...</div>
+
+    <div *ngIf="!loading" class="state-message" [class.success]="success" [class.error]="!success">
+      {{ message }}
+    </div>
+
+    <div *ngIf="!loading" class="actions">
+      <button *ngIf="success" class="btn-primary" type="button" (click)="irAPerfil()">Ir a mi perfil</button>
+      <button *ngIf="!success" class="btn-primary" type="button" (click)="irALogin()">Iniciar sesión</button>
+      <button class="btn-secondary" type="button" (click)="irAInicio()">Volver al inicio</button>
+    </div>
+  </section>
+</div>

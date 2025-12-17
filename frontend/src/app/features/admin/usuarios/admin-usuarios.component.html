@@ -1,0 +1,59 @@
+<div class="page-wrapper">
+	<section class="card">
+		<div class="card-header">
+			<h2>Usuarios</h2>
+		</div>
+
+		<nav class="admin-tabs">
+			<a routerLink="/admin" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Resumen</a>
+			<a routerLink="/admin/incidentes" routerLinkActive="active">Incidentes</a>
+			<a routerLink="/admin/usuarios" routerLinkActive="active">Usuarios</a>
+			<a routerLink="/admin/articulos" routerLinkActive="active">Artículos</a>
+			<a routerLink="/admin/puntos-entrega" routerLinkActive="active">Puntos de entrega</a>
+		</nav>
+
+		<div class="admin-filters">
+			<input
+				type="text"
+				[(ngModel)]="search"
+				placeholder="Buscar por nombre/correo"
+				(keydown.enter)="buscar()"
+			/>
+			<button class="btn-secondary" type="button" (click)="buscar()">Buscar</button>
+		</div>
+
+		<div *ngIf="loading" class="state-message">Cargando usuarios...</div>
+		<div *ngIf="errorMessage" class="state-message error">{{ errorMessage }}</div>
+
+		<div *ngIf="!loading && data && data.items.length === 0" class="state-message">
+			No hay usuarios.
+		</div>
+
+		<div *ngIf="!loading && data && data.items.length > 0" class="table-wrapper">
+			<table class="admin-table">
+				<thead>
+					<tr>
+						<th>ID</th>
+						<th>Nombre</th>
+						<th>Correo</th>
+						<th>Roles</th>
+						<th>Estado</th>
+						<th>Rating</th>
+						<th># Rentas</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr *ngFor="let u of data.items">
+						<td>{{ u.id_usuario }}</td>
+						<td>{{ u.nombre }} {{ u.apellidos }}</td>
+						<td>{{ u.correo_electronico }}</td>
+						<td>{{ (u.roles || []).join(', ') || '-' }}</td>
+						<td>{{ u.estado_cuenta }}</td>
+						<td>{{ u.rating_promedio }} ({{ u.rating_total }})</td>
+						<td>{{ u.rentas_count }}</td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+	</section>
+</div>

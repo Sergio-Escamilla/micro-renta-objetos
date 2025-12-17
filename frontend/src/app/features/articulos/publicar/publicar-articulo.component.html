@@ -1,0 +1,176 @@
+<div class="page-wrapper">
+  <section class="card">
+    <div class="card-header">
+      <h2>Publicar artículo</h2>
+
+      <div class="header-actions">
+        <button class="btn-secondary" type="button" (click)="cancelar()">
+          Volver
+        </button>
+        <button class="btn-primary" type="button" [disabled]="loading" (click)="publicar()">
+          {{ loading ? 'Publicando...' : 'Publicar' }}
+        </button>
+      </div>
+    </div>
+
+  <ng-container *ngIf="adminBlocked">
+    <div class="state-message error">
+      Acción no disponible para administradores.
+      <div class="actions">
+        <button class="btn-secondary" type="button" (click)="irAExplorar()">Volver a Explorar</button>
+      </div>
+    </div>
+  </ng-container>
+
+  <ng-container *ngIf="!adminBlocked">
+
+    <div *ngIf="errorMessage" class="state-message error">
+      {{ errorMessage }}
+      <div *ngIf="requiresProfile" class="actions">
+        <button class="btn-secondary" type="button" (click)="irAPerfil()">Ir a perfil</button>
+      </div>
+    </div>
+    <div *ngIf="successMessage" class="state-message success">{{ successMessage }}</div>
+
+    <!-- Modal gating: perfil incompleto / correo no verificado -->
+    <div class="modal-backdrop" *ngIf="gateOpen" (click)="cerrarGateModal()"></div>
+    <div class="modal" *ngIf="gateOpen" role="dialog" aria-modal="true">
+      <div class="modal-card">
+        <div class="modal-head">
+          <h3>Antes de publicar</h3>
+          <button class="btn-secondary" type="button" (click)="cerrarGateModal()">Cerrar</button>
+        </div>
+
+        <p class="modal-sub">Completa estos requisitos para continuar:</p>
+
+        <div class="checklist">
+          <div class="check" [class.done]="gateMissing.indexOf('correo_verificado') === -1">
+            Correo verificado
+          </div>
+          <div class="check" [class.done]="gateMissing.indexOf('telefono') === -1">
+            Teléfono
+          </div>
+          <div class="check" [class.done]="gateMissing.indexOf('ubicacion') === -1">
+            Ubicación (ciudad/estado/país)
+          </div>
+        </div>
+
+        <div class="modal-actions">
+          <button class="btn-secondary" type="button" (click)="gateIrAPerfil()">Ir a Perfil</button>
+          <button
+            class="btn-primary"
+            type="button"
+            [disabled]="gateSendingVerification || gateMissing.indexOf('correo_verificado') === -1"
+            (click)="gateEnviarVerificacion()"
+          >
+            {{ gateSendingVerification ? 'Enviando...' : 'Enviar verificación' }}
+          </button>
+        </div>
+
+        <div class="state-message" *ngIf="gateMessage">{{ gateMessage }}</div>
+      </div>
+    </div>
+
+    <form class="form" [formGroup]="form" (ngSubmit)="publicar()">
+      <div class="form-row">
+        <label>Título</label>
+        <input type="text" formControlName="titulo" placeholder="Ej. Taladro inalámbrico" />
+        <small class="hint" *ngIf="form.get('titulo')?.touched && form.get('titulo')?.invalid">
+          El título es obligatorio.
+        </small>
+      </div>
+
+      <div class="form-row">
+        <label>Descripción</label>
+        <textarea rows="4" formControlName="descripcion" placeholder="Describe el artículo y sus condiciones"></textarea>
+        <small class="hint" *ngIf="form.get('descripcion')?.touched && form.get('descripcion')?.invalid">
+          La descripción es obligatoria.
+        </small>
+      </div>
+
+      <div class="form-grid">
+        <div class="form-row">
+          <label>Categoría</label>
+          <select formControlName="id_categoria" [disabled]="loadingCategorias">
+            <option [ngValue]="null">{{ loadingCategorias ? 'Cargando...' : 'Selecciona una categoría' }}</option>
+            <option *ngFor="let c of categorias" [ngValue]="c.id">{{ c.nombre }}</option>
+          </select>
+          <small class="hint" *ngIf="form.get('id_categoria')?.touched && form.get('id_categoria')?.invalid">
+            La categoría es obligatoria.
+          </small>
+        </div>
+
+        <div class="form-row">
+          <label>Modalidades</label>
+          <div class="toggles">
+            <label class="toggle">
+              <input type="checkbox" formControlName="rentar_por_dias" />
+              <span>Rentar por días</span>
+            </label>
+            <label class="toggle">
+              <input type="checkbox" formControlName="rentar_por_horas" />
+              <span>Rentar por horas</span>
+            </label>
+          </div>
+          <small class="hint">Puedes activar una o ambas.</small>
+          <small class="hint" *ngIf="form.value.rentar_por_dias && form.value.rentar_por_horas">
+            Nota: tu base actual solo guarda 1 modalidad por artículo.
+          </small>
+        </div>
+
+        <div class="form-row">
+          <label *ngIf="form.value.rentar_por_dias">Precio por día</label>
+          <input *ngIf="form.value.rentar_por_dias" type="number" min="0" formControlName="precio_renta_dia" placeholder="0" />
+
+          <label *ngIf="form.value.rentar_por_horas" class="mt-10">Precio por hora</label>
+          <input *ngIf="form.value.rentar_por_horas" type="number" min="0" formControlName="precio_renta_hora" placeholder="0" />
+        </div>
+
+        <div class="form-row">
+          <label>Depósito</label>
+          <input type="number" min="0" formControlName="deposito_garantia" placeholder="0" />
+        </div>
+      </div>
+
+      <div class="form-grid">
+        <div class="form-row">
+          <label>Ciudad</label>
+          <input type="text" formControlName="ciudad" placeholder="Ej. Guadalajara" />
+          <small class="hint" *ngIf="form.get('ciudad')?.touched && form.get('ciudad')?.invalid">
+            La ciudad es obligatoria.
+          </small>
+        </div>
+
+        <div class="form-row">
+          <label>Ubicación (opcional)</label>
+          <input type="text" formControlName="ubicacion_texto" placeholder="Colonia / zona" />
+        </div>
+      </div>
+
+      <div class="imagenes">
+        <div class="imagenes-header">
+          <h3>Imágenes</h3>
+          <span class="hint">(se suben al servidor)</span>
+        </div>
+
+        <input
+          type="file"
+          multiple
+          accept="image/*"
+          (change)="onFilesSelected($event)"
+        />
+
+        <div *ngIf="selectedFiles.length > 0" class="files-info">
+          {{ selectedFiles.length }} archivo(s) seleccionado(s)
+        </div>
+
+        <small class="hint">Formatos permitidos: jpg, jpeg, png, webp.</small>
+      </div>
+
+      <button class="btn-primary mobile-submit" type="submit" [disabled]="loading">
+        {{ loading ? 'Publicando...' : 'Publicar' }}
+      </button>
+    </form>
+  	</ng-container>
+  </section>
+</div>

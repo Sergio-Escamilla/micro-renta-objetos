@@ -1,0 +1,127 @@
+<div class="page-wrapper">
+  <section class="card">
+    <div class="card-header">
+      <h2>Bandeja</h2>
+      <div class="spacer"></div>
+    </div>
+
+    <div class="tabs">
+      <button
+        type="button"
+        class="tab"
+        [class.active]="selectedTab === 'dueno_activas'"
+        (click)="cargarTab('dueno_activas')"
+      >
+        Dueño – Activas
+      </button>
+      <button
+        type="button"
+        class="tab"
+        [class.active]="selectedTab === 'arrendatario_activas'"
+        (click)="cargarTab('arrendatario_activas')"
+      >
+        Arrendatario – Activas
+      </button>
+      <button
+        type="button"
+        class="tab"
+        [class.active]="selectedTab === 'historial'"
+        (click)="cargarTab('historial')"
+      >
+        Historial
+      </button>
+    </div>
+
+    <div *ngIf="selectedTab === 'historial'" class="historial-rol">
+      <button
+        type="button"
+        class="btn-secondary"
+        [class.active]="rolHistorial === 'dueno'"
+        (click)="cambiarRolHistorial('dueno')"
+      >
+        Dueño
+      </button>
+      <button
+        type="button"
+        class="btn-secondary"
+        [class.active]="rolHistorial === 'arrendatario'"
+        (click)="cambiarRolHistorial('arrendatario')"
+      >
+        Arrendatario
+      </button>
+    </div>
+
+    <div *ngIf="loading" class="state-message">Cargando...</div>
+    <div *ngIf="!loading && errorMessage" class="state-message error">{{ errorMessage }}</div>
+
+    <div *ngIf="!loading && !errorMessage && items.length === 0" class="state-message">
+      No hay rentas para mostrar.
+    </div>
+
+    <div *ngIf="!loading && !errorMessage && items.length > 0" class="grid">
+      <article class="item" *ngFor="let r of items">
+        <div class="media">
+          <ng-container *ngIf="r.articulo?.imagen; else placeholder">
+            <img class="img" [src]="r.articulo?.imagen" [alt]="r.articulo?.titulo || 'Artículo'" />
+          </ng-container>
+          <ng-template #placeholder>
+            <div class="img placeholder"></div>
+          </ng-template>
+        </div>
+
+        <div class="content">
+          <div class="title-row">
+            <div class="titulo">{{ r.articulo?.titulo || 'Artículo' }}</div>
+            <span class="badge">{{ r.estado }}</span>
+          </div>
+
+          <div class="sub">
+            {{ r.fechas?.inicio | date: 'short' }} → {{ r.fechas?.fin | date: 'short' }}
+          </div>
+
+          <div class="sub">
+            {{ r.modalidad || '-' }}
+            <span *ngIf="r.total != null"> · Total: ${{ r.total }}</span>
+            <span *ngIf="r.deposito != null"> · Depósito: ${{ r.deposito }}</span>
+          </div>
+
+            <div class="punto-seguro" *ngIf="(r.punto_entrega_nombre || r.punto_entrega?.nombre) as peNombre">
+              <span class="badge">Punto seguro</span>
+              <div class="punto-text" title="{{ peNombre }}">{{ peNombre }}</div>
+            </div>
+            <div
+              class="punto-dir"
+              *ngIf="(r.punto_entrega_direccion || r.punto_entrega?.direccion) as peDir"
+              title="{{ peDir }}"
+            >
+              {{ peDir }}
+            </div>
+
+          <div *ngIf="selectedTab === 'historial'" class="mini-timeline">
+            <div class="mini-step" *ngFor="let st of historialTimeline(r)">
+              <span class="mini-dot" [class.done]="st.status === 'done'" aria-hidden="true"></span>
+              <div class="mini-label">{{ st.label }}</div>
+              <div class="mini-date" *ngIf="st.date">{{ st.date | date: 'short' }}</div>
+            </div>
+          </div>
+
+          <div class="actions">
+            <div class="unread" *ngIf="unread(r.id_renta) > 0">
+              <span class="unread-badge">{{ unread(r.id_renta) }}</span>
+              <span class="unread-text">sin leer</span>
+            </div>
+
+            <div class="spacer"></div>
+
+            <button class="btn-primary" type="button" (click)="verResumen(r.id_renta)">
+              Abrir
+            </button>
+            <button class="btn-secondary" type="button" (click)="abrirChat(r.id_renta)">
+              Chat
+            </button>
+          </div>
+        </div>
+      </article>
+    </div>
+  </section>
+</div>

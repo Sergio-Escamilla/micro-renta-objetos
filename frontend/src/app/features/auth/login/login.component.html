@@ -1,0 +1,70 @@
+<div class="auth-container">
+  <div class="auth-card">
+    <div class="auth-logo">
+      <img src="assets/brand/logo_renta.jpg" alt="DentalCare" />
+    </div>
+
+    <div class="auth-brand">
+      <div class="auth-brand-text">
+        <div class="auth-name">Micro Renta</div>
+        <div class="auth-slogan">Renta objetos cerca de ti, en minutos.</div>
+      </div>
+    </div>
+
+    <div class="auth-tabs" role="tablist" aria-label="Acceso">
+      <a
+        class="auth-tab"
+        routerLink="/login"
+        routerLinkActive="active"
+        [routerLinkActiveOptions]="{ exact: true }"
+        >Iniciar sesión</a
+      >
+      <a
+        class="auth-tab"
+        routerLink="/register"
+        routerLinkActive="active"
+        [routerLinkActiveOptions]="{ exact: true }"
+        >Registrarse</a
+      >
+    </div>
+
+    <!-- FORMULARIO REACTIVO CORRECTO -->
+    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+      <label>
+        Correo electrónico
+        <input
+          type="email"
+          formControlName="correo_electronico"
+          placeholder="tu@correo.com"
+        />
+      </label>
+
+      <label>
+        Contraseña
+        <input
+          type="password"
+          formControlName="contrasena"
+          placeholder="••••••••"
+        />
+      </label>
+
+      <button type="submit" [disabled]="loginForm.invalid || loading">
+        {{ loading ? 'Ingresando...' : 'Entrar' }}
+      </button>
+
+      <div class="auth-sep" aria-hidden="true">
+        <span></span>
+        <div class="auth-sep-text">o</div>
+        <span></span>
+      </div>
+
+      <button type="button" class="btn-ghost auth-google" disabled>
+        Continuar con Google
+      </button>
+
+      <p *ngIf="errorMessage" class="error-msg">
+        {{ errorMessage }}
+      </p>
+    </form>
+  </div>
+</div>

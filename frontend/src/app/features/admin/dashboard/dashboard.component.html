@@ -1,0 +1,45 @@
+<div class="page-wrapper">
+	<section class="card">
+		<div class="card-header">
+			<h2>Panel Admin</h2>
+		</div>
+
+		<nav class="admin-tabs">
+			<a routerLink="/admin" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Resumen</a>
+			<a routerLink="/admin/incidentes" routerLinkActive="active">Incidentes</a>
+			<a routerLink="/admin/usuarios" routerLinkActive="active">Usuarios</a>
+			<a routerLink="/admin/articulos" routerLinkActive="active">Artículos</a>
+			<a routerLink="/admin/puntos-entrega" routerLinkActive="active">Puntos de entrega</a>
+		</nav>
+
+		<div *ngIf="loading" class="state-message">Cargando resumen...</div>
+		<div *ngIf="errorMessage" class="state-message error">{{ errorMessage }}</div>
+
+		<div *ngIf="!loading && resumen" class="admin-grid">
+			<div class="admin-metric">
+				<div class="label">Usuarios</div>
+				<div class="value">{{ resumen.usuarios }}</div>
+			</div>
+			<div class="admin-metric">
+				<div class="label">Artículos</div>
+				<div class="value">{{ resumen.articulos }}</div>
+			</div>
+			<div class="admin-metric">
+				<div class="label">Rentas activas</div>
+				<div class="value">{{ resumen.rentas_activas }}</div>
+			</div>
+			<div class="admin-metric">
+				<div class="label">Rentas finalizadas</div>
+				<div class="value">{{ resumen.rentas_finalizadas }}</div>
+			</div>
+			<div class="admin-metric">
+				<div class="label">Incidentes abiertos</div>
+				<div class="value">{{ resumen.incidentes_abiertos }}</div>
+			</div>
+			<div class="admin-metric" *ngIf="resumen.notificaciones_no_leidas_total !== null && resumen.notificaciones_no_leidas_total !== undefined">
+				<div class="label">Notificaciones no leídas</div>
+				<div class="value">{{ resumen.notificaciones_no_leidas_total }}</div>
+			</div>
+		</div>
+	</section>
+</div>

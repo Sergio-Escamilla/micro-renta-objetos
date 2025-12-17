@@ -1,0 +1,141 @@
+<div class="page-wrapper">
+	<section class="card">
+		<div class="card-header">
+			<h2>Incidentes</h2>
+		</div>
+
+		<nav class="admin-tabs">
+			<a routerLink="/admin" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Resumen</a>
+			<a routerLink="/admin/incidentes" routerLinkActive="active">Incidentes</a>
+			<a routerLink="/admin/usuarios" routerLinkActive="active">Usuarios</a>
+			<a routerLink="/admin/articulos" routerLinkActive="active">Artículos</a>
+			<a routerLink="/admin/puntos-entrega" routerLinkActive="active">Puntos de entrega</a>
+		</nav>
+
+		<div class="admin-filters">
+			<button class="btn-secondary" type="button" (click)="setEstado('abierto')" [disabled]="estado === 'abierto'">
+				Abiertos
+			</button>
+			<button class="btn-secondary" type="button" (click)="setEstado('resuelto')" [disabled]="estado === 'resuelto'">
+				Resueltos
+			</button>
+		</div>
+
+		<div *ngIf="loading" class="state-message">Cargando incidentes...</div>
+		<div *ngIf="errorMessage" class="state-message error">{{ errorMessage }}</div>
+		<div *ngIf="successMessage" class="state-message success">{{ successMessage }}</div>
+
+		<div *ngIf="!loading && data && data.items.length === 0" class="state-message">
+			No hay incidentes en este estado.
+		</div>
+
+		<div *ngIf="!loading && data && data.items.length > 0" class="table-wrapper">
+			<table class="admin-table">
+				<thead>
+					<tr>
+						<th>ID</th>
+						<th>Renta</th>
+						<th>Artículo</th>
+						<th>Detalle</th>
+						<th>Acciones</th>
+					</tr>
+				</thead>
+				<tbody>
+					<ng-container *ngFor="let inc of data.items">
+						<tr>
+							<td>{{ inc.id }}</td>
+							<td>
+								<button class="btn-secondary" type="button" (click)="verRenta(inc.id_renta)">
+									#{{ inc.id_renta }}
+								</button>
+								<div class="meta" *ngIf="inc.renta">
+									Depósito: {{ formatMoney(inc.renta.monto_deposito) }}
+								</div>
+							</td>
+							<td>{{ inc.articulo?.titulo || '-' }}</td>
+							<td>
+								<div class="desc">{{ inc.descripcion }}</div>
+								<div class="meta" *ngIf="inc.arrendatario && inc.propietario">
+									{{ inc.arrendatario.nombre }} {{ inc.arrendatario.apellidos }} →
+									{{ inc.propietario.nombre }} {{ inc.propietario.apellidos }}
+								</div>
+								<div class="meta" *ngIf="inc.estado === 'resuelto'">
+									Decisión: {{ decisionLabel(inc.decision) }}
+									<span *ngIf="inc.monto_retenido != null"> · Retenido: {{ formatMoney(inc.monto_retenido) }}</span>
+								</div>
+								<div class="meta" *ngIf="inc.estado === 'resuelto' && inc.nota">
+									Nota: {{ inc.nota }}
+								</div>
+							</td>
+							<td>
+								<button
+									class="btn-secondary"
+									type="button"
+									(click)="toggleResolver(inc)"
+									[disabled]="inc.estado !== 'abierto'"
+								>
+									Resolver
+								</button>
+							</td>
+						</tr>
+
+						<tr *ngIf="resolverState[inc.id]?.open" class="resolver-row">
+							<td colspan="5">
+								<div class="resolver-box">
+									<div class="resolver-title">
+										<strong>Resolver incidente</strong>
+										<span class="meta" *ngIf="inc.renta"> · Depósito: {{ formatMoney(inc.renta.monto_deposito) }}</span>
+									</div>
+
+									<div class="resolver-radios">
+										<label class="radio">
+											<input type="radio" [name]="'dec-'+inc.id" value="liberar" [(ngModel)]="resolverState[inc.id].decision" />
+											<span>Liberar depósito</span>
+										</label>
+										<label class="radio">
+											<input type="radio" [name]="'dec-'+inc.id" value="retener_parcial" [(ngModel)]="resolverState[inc.id].decision" />
+											<span>Retener parcial</span>
+										</label>
+										<label class="radio">
+											<input type="radio" [name]="'dec-'+inc.id" value="retener_total" [(ngModel)]="resolverState[inc.id].decision" />
+											<span>Retener total</span>
+										</label>
+									</div>
+
+									<label *ngIf="resolverState[inc.id].decision === 'retener_parcial'">
+										Monto retenido (parcial)
+										<input type="number" min="0" [(ngModel)]="resolverState[inc.id].monto_retenido" />
+									</label>
+
+									<label>
+										Nota
+										<textarea rows="2" [(ngModel)]="resolverState[inc.id].nota"></textarea>
+										<small class="hint" *ngIf="resolverState[inc.id].decision !== 'liberar'">Obligatoria si retienes total/parcial.</small>
+									</label>
+
+									<div *ngIf="resolverState[inc.id].error" class="state-message error">
+										{{ resolverState[inc.id].error }}
+									</div>
+
+									<div class="resolver-actions">
+										<button
+											class="btn-secondary"
+											type="button"
+											(click)="resolver(inc)"
+											[disabled]="resolverState[inc.id].loading"
+										>
+											{{ resolverState[inc.id].loading ? 'Resolviendo...' : 'Confirmar' }}
+										</button>
+										<button class="btn-secondary" type="button" (click)="toggleResolver(inc)">
+											Cerrar
+										</button>
+									</div>
+								</div>
+							</td>
+						</tr>
+					</ng-container>
+				</tbody>
+			</table>
+		</div>
+	</section>
+</div>

@@ -1,0 +1,204 @@
+<div class="page-wrapper">
+	<section class="card">
+		<div class="card-header">
+			<h2>Perfil</h2>
+
+			<div class="header-actions">
+				<button class="btn-secondary" type="button" (click)="irAExplorar()">
+					Ver artículos
+				</button>
+				<button *ngIf="!esAdmin" class="btn-secondary" type="button" (click)="irAPublicar()">
+					Publicar artículo
+				</button>
+				<button class="btn-logout" type="button" (click)="cerrarSesion()">
+					Cerrar sesión
+				</button>
+			</div>
+		</div>
+
+		<div *ngIf="loadingUser" class="state-message">Cargando perfil...</div>
+
+		<div *ngIf="loadingResumen" class="state-message">Cargando resumen...</div>
+		<div *ngIf="!loadingResumen && resumen" class="metrics">
+			<div class="metric">
+				<div class="metric-label">Artículos</div>
+				<div class="metric-value">{{ resumen.articulos_publicados }}</div>
+			</div>
+			<div class="metric">
+				<div class="metric-label">Rentas (como arrendatario)</div>
+				<div class="metric-value">{{ resumen.rentas_como_arrendatario }}</div>
+			</div>
+			<div class="metric">
+				<div class="metric-label">Rentas (como dueño)</div>
+				<div class="metric-value">{{ resumen.rentas_como_propietario }}</div>
+			</div>
+		</div>
+
+		<div *ngIf="!loadingUser && user" class="perfil-grid">
+			<div class="perfil-item">
+				<div class="label">Nombre</div>
+				<div class="value">{{ user.nombre }} {{ user.apellidos }}</div>
+			</div>
+			<div class="perfil-item" *ngIf="rating">
+				<div class="label">Calificación</div>
+				<div class="value">
+					{{ rating.promedio }} / 5 ({{ rating.total }} reseñas)
+				</div>
+			</div>
+			<div class="perfil-item">
+				<div class="label">Correo</div>
+				<div class="value">{{ user.correo_electronico }}</div>
+			</div>
+			<div class="perfil-item">
+				<div class="label">Verificación</div>
+				<div class="value">
+					<span class="chip" [class.success]="user.verificado" [class.danger]="!user.verificado">
+						{{ user.verificado ? 'Verificado' : 'Pendiente' }}
+					</span>
+				</div>
+			</div>
+		</div>
+
+		<div *ngIf="!loadingUser && user" class="state-message">
+			<div class="edit-header">
+				<h3>Editar perfil</h3>
+				<div class="spacer"></div>
+				<button class="btn-secondary" type="button" (click)="toggleEditar()">
+					{{ editMode ? 'Cancelar' : 'Editar' }}
+				</button>
+			</div>
+
+			<form *ngIf="editMode" class="form" [formGroup]="form" (ngSubmit)="guardarPerfil()">
+				<div class="form-grid">
+					<div class="form-row">
+						<label>Nombre</label>
+						<input type="text" formControlName="nombre" />
+					</div>
+					<div class="form-row">
+						<label>Apellidos</label>
+						<input type="text" formControlName="apellidos" />
+					</div>
+					<div class="form-row">
+						<label>Teléfono</label>
+						<input type="text" formControlName="telefono" placeholder="Ej. 3312345678" />
+					</div>
+					<div class="form-row">
+						<label>Ciudad</label>
+						<input type="text" formControlName="ciudad" />
+					</div>
+					<div class="form-row">
+						<label>Estado</label>
+						<input type="text" formControlName="estado" />
+					</div>
+					<div class="form-row">
+						<label>País</label>
+						<input type="text" formControlName="pais" />
+					</div>
+				</div>
+				<div class="form-row">
+					<label>Dirección completa (opcional)</label>
+					<textarea rows="3" formControlName="direccion_completa"></textarea>
+				</div>
+
+				<button class="btn-primary" type="submit" [disabled]="savingProfile">
+					{{ savingProfile ? 'Guardando...' : 'Guardar cambios' }}
+				</button>
+			</form>
+		</div>
+
+		<div *ngIf="profileMessage" class="state-message success">{{ profileMessage }}</div>
+
+		<div *ngIf="!loadingUser && user && !user.verificado" class="state-message">
+			<strong>Verifica tu correo</strong> para publicar y rentar.
+			<div class="actions">
+				<button class="btn-secondary" type="button" (click)="enviarVerificacionCorreo()" [disabled]="sendingVerification">
+					{{ sendingVerification ? 'Enviando...' : 'Enviar link de verificación' }}
+				</button>
+			</div>
+		</div>
+
+		<div *ngIf="verificationMessage" class="state-message success">{{ verificationMessage }}</div>
+
+		<div *ngIf="errorMessage" class="state-message error">{{ errorMessage }}</div>
+
+		<h3 class="section-title">Notificaciones <span *ngIf="unreadCount > 0">({{ unreadCount }} nuevas)</span></h3>
+
+		<div *ngIf="loadingNotificaciones" class="state-message">Cargando notificaciones...</div>
+		<div *ngIf="!loadingNotificaciones && notificaciones.length === 0" class="state-message">
+			No tienes notificaciones.
+		</div>
+		<div *ngIf="!loadingNotificaciones && notificaciones.length > 0" class="state-message">
+			<div *ngFor="let n of notificaciones" class="noti-row">
+				<div class="noti-body" (click)="abrirNotificacion(n)" [class.noti-clickable]="tieneLink(n)">
+					<div class="noti-title-row">
+						<div class="noti-title">
+							<strong *ngIf="!n.leida" class="noti-new">[Nueva]</strong>
+							<span>{{ notiTitulo(n) }}</span>
+						</div>
+						<div class="noti-date">{{ notiFecha(n) }}</div>
+					</div>
+					<div class="noti-msg">{{ n.mensaje }}</div>
+					<div class="noti-meta" *ngIf="notiExtra(n)">{{ notiExtra(n) }}</div>
+				</div>
+				<button class="btn-secondary" type="button" (click)="marcarNotificacionLeida(n)" [disabled]="n.leida">
+					{{ n.leida ? 'Leída' : 'Marcar leída' }}
+				</button>
+			</div>
+		</div>
+
+		<h3 class="section-title">Mis artículos</h3>
+
+		<div *ngIf="loadingArticulos" class="state-message">Cargando tus artículos...</div>
+
+		<div *ngIf="!loadingArticulos && articulos.length === 0" class="state-message">
+			Aún no has publicado artículos.
+		</div>
+
+		<div *ngIf="!loadingArticulos && articulos.length > 0" class="articulos-grid">
+			<article class="articulo-card" *ngFor="let art of articulos">
+				<div class="imagen-wrapper">
+					<img
+						*ngIf="art.imagen_principal_url"
+						class="articulo-img"
+						[src]="art.imagen_principal_url"
+						[alt]="art.titulo"
+					/>
+					<div *ngIf="!art.imagen_principal_url" class="no-image">Sin imagen</div>
+				</div>
+
+				<div class="articulo-body">
+					<h4>{{ art.titulo }}</h4>
+					<div class="articulo-sub">
+						<span class="ciudad" *ngIf="art.ciudad">{{ art.ciudad }}</span>
+					</div>
+					<div class="articulo-meta">
+						<span class="precio">
+							<ng-container *ngIf="art.precio_renta_dia && art.precio_renta_hora">
+								${{ art.precio_renta_dia }} / día · ${{ art.precio_renta_hora }} / hora
+							</ng-container>
+							<ng-container *ngIf="art.precio_renta_dia && !art.precio_renta_hora">
+								${{ art.precio_renta_dia }} / día
+							</ng-container>
+							<ng-container *ngIf="!art.precio_renta_dia && art.precio_renta_hora">
+								${{ art.precio_renta_hora }} / hora
+							</ng-container>
+							<ng-container *ngIf="!art.precio_renta_dia && !art.precio_renta_hora && art.precio_base">
+								${{ art.precio_base }} /
+								{{ art.unidad_precio === 'por_hora' ? 'hora' : (art.unidad_precio === 'por_semana' ? 'semana' : 'día') }}
+							</ng-container>
+						</span>
+					</div>
+
+					<div class="header-actions">
+						<button class="btn-secondary" type="button" (click)="irADetalle(art)">
+							Ver detalle
+						</button>
+						<button class="btn-secondary" type="button" (click)="irAEditar(art)">
+							Editar
+						</button>
+					</div>
+				</div>
+			</article>
+		</div>
+	</section>
+</div>

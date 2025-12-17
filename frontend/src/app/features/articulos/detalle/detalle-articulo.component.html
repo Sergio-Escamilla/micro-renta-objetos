@@ -1,0 +1,88 @@
+<div class="page-wrapper">
+	<section class="card">
+		<div class="card-header">
+			<button class="btn-secondary" type="button" (click)="volver()">Volver</button>
+			<h2>Detalle</h2>
+			<div class="spacer"></div>
+		</div>
+
+		<div *ngIf="loading" class="state-message">Cargando detalle...</div>
+		<div *ngIf="!loading && errorMessage" class="state-message error">{{ errorMessage }}</div>
+
+		<ng-container *ngIf="!loading && !errorMessage && articulo">
+			<div class="badge" *ngIf="esMio">Tu artículo</div>
+
+			<div *ngIf="loadingOcupacion" class="state-message">Cargando disponibilidad...</div>
+			<div *ngIf="!loadingOcupacion && ocupacionProxima.length > 0" class="state-message">
+				<strong>No disponible en (próx. 30 días):</strong>
+				<div *ngFor="let o of ocupacionProxima">{{ o.inicio }} → {{ o.fin }}</div>
+			</div>
+
+			<div class="detalle-grid">
+				<div class="media">
+					<div class="imagen-principal">
+						<img *ngIf="imagenActivaUrl" [src]="imagenActivaUrl" [alt]="articulo.titulo" />
+						<div *ngIf="!imagenActivaUrl" class="no-image">Sin imagen</div>
+					</div>
+
+					<div class="thumbs" *ngIf="articulo.imagenes && articulo.imagenes.length > 1">
+						<button
+							class="thumb"
+							type="button"
+							*ngFor="let img of articulo.imagenes"
+							(click)="setImagenActiva(img.url_imagen)"
+						>
+							<img [src]="img.url_imagen" alt="miniatura" />
+						</button>
+					</div>
+				</div>
+
+				<div class="info">
+					<h3 class="titulo">{{ articulo.titulo }}</h3>
+					<p class="descripcion">{{ articulo.descripcion }}</p>
+
+					<div class="meta">
+						<div>
+							<span class="k">Precio</span>
+							<span class="v">
+								<ng-container *ngIf="articulo.precio_renta_dia && articulo.precio_renta_hora">
+									${{ articulo.precio_renta_dia }} / día · ${{ articulo.precio_renta_hora }} / hora
+								</ng-container>
+								<ng-container *ngIf="articulo.precio_renta_dia && !articulo.precio_renta_hora">
+									${{ articulo.precio_renta_dia }} / día
+								</ng-container>
+								<ng-container *ngIf="!articulo.precio_renta_dia && articulo.precio_renta_hora">
+									${{ articulo.precio_renta_hora }} / hora
+								</ng-container>
+								<ng-container *ngIf="!articulo.precio_renta_dia && !articulo.precio_renta_hora && articulo.precio_base">
+									${{ articulo.precio_base }} /
+									{{ articulo.unidad_precio === 'por_hora' ? 'hora' : (articulo.unidad_precio === 'por_semana' ? 'semana' : 'día') }}
+								</ng-container>
+							</span>
+						</div>
+						<div *ngIf="propietarioRating">
+							<span class="k">Calificación dueño</span>
+							<span class="v">{{ propietarioRating.promedio }} / 5 ({{ propietarioRating.total }})</span>
+						</div>
+						<div *ngIf="articulo.ciudad"><span class="k">Ciudad</span> <span class="v">{{ articulo.ciudad }}</span></div>
+						<div *ngIf="articulo.ubicacion_texto"><span class="k">Ubicación</span> <span class="v">{{ articulo.ubicacion_texto }}</span></div>
+					</div>
+
+					<button
+						*ngIf="!esMio && !esAdmin"
+						class="btn-primary"
+						type="button"
+						(click)="rentarAhora()"
+					>
+						Rentar ahora
+					</button>
+
+					<div *ngIf="esMio" class="hint">
+						No puedes rentar tu propio artículo.
+					</div>
+				</div>
+			</div>
+		</ng-container>
+	</section>
+</div>
+

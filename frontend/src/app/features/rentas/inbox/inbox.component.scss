@@ -1,0 +1,266 @@
+.tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+@media (max-width: 420px) {
+  .tabs {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 6px;
+  }
+}
+
+.historial-rol {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+@media (max-width: 420px) {
+  .historial-rol {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 6px;
+  }
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+	max-width: 100%;
+	overflow: hidden;
+	min-width: 0;
+}
+
+@media (min-width: 768px) {
+  .grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.item {
+  display: grid;
+  grid-template-columns: 76px 1fr;
+  gap: 12px;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface-2);
+	max-width: 100%;
+	overflow: hidden;
+	min-width: 0;
+}
+
+@media (max-width: 420px) {
+  .item {
+    grid-template-columns: 1fr;
+  }
+}
+
+.media {
+  display: flex;
+	min-width: 0;
+}
+
+@media (max-width: 420px) {
+  .media {
+    justify-content: flex-start;
+  }
+}
+
+.img {
+  width: 76px;
+  height: 76px;
+  border-radius: 10px;
+  object-fit: cover;
+	border: 1px solid var(--border);
+}
+
+@media (max-width: 420px) {
+  .img {
+    width: 100%;
+    height: 180px;
+    border-radius: var(--radius-md);
+  }
+}
+
+.placeholder {
+	background: var(--surface-3);
+}
+
+.title-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: space-between;
+	min-width: 0;
+}
+
+@media (max-width: 420px) {
+  .title-row {
+    flex-wrap: wrap;
+    justify-content: flex-start;
+  }
+}
+
+.titulo {
+  font-weight: 700;
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  white-space: normal;
+}
+
+.badge {
+  flex: 0 0 auto;
+}
+
+.sub {
+  opacity: 0.85;
+  font-size: 14px;
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+}
+
+.punto-seguro {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 6px;
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+}
+
+.punto-text {
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 14px;
+  opacity: 0.9;
+}
+
+.punto-dir {
+  margin-top: 2px;
+  font-size: 13px;
+  opacity: 0.75;
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media (max-width: 390px) {
+  .punto-seguro {
+    flex-wrap: nowrap;
+  }
+  .punto-text,
+  .punto-dir {
+    white-space: nowrap;
+  }
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.mini-timeline {
+  margin-top: 10px;
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+}
+
+.mini-step {
+  display: grid;
+  grid-template-columns: 10px 1fr auto;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.mini-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.18);
+  border: 1px solid rgba(15, 23, 42, 0.20);
+}
+
+.mini-dot.done {
+  background: rgba(20, 184, 166, 0.22);
+  border-color: rgba(20, 184, 166, 0.35);
+}
+
+.mini-label {
+  font-size: 13px;
+  opacity: 0.9;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mini-date {
+  font-size: 12px;
+  opacity: 0.75;
+  white-space: nowrap;
+}
+
+@media (max-width: 420px) {
+  .actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .actions .spacer {
+    display: none;
+  }
+  .actions button {
+    width: 100%;
+  }
+}
+
+.unread {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.unread-badge {
+  display: inline-flex;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 6px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+	border: 1px solid rgba(20, 184, 166, 0.30);
+	background: rgba(20, 184, 166, 0.18);
+  font-size: 12px;
+	font-weight: 800;
+	color: #05201f;
+}
+
+.unread-text {
+  font-size: 12px;
+  opacity: 0.85;
+}

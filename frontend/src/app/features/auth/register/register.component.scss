@@ -1,0 +1,11 @@
+@import '../login/login.component.scss';
+
+.success {
+  margin-top: 8px;
+  color: #14532d;
+  font-size: 13px;
+  background: var(--color-success-bg);
+  border: 1px solid rgba(22, 163, 74, 0.18);
+  padding: 10px 12px;
+  border-radius: 14px;
+}

@@ -1,0 +1,1 @@
+{"to": "admin@gmail.com", "subject": "Verifica tu correo", "body": "Hola admin.\n\nVerifica tu correo haciendo clic en este link:\nhttp://localhost:4200/verificar-email?token=eyJpZF91c3VhcmlvIjoxMSwiY29ycmVvX2VsZWN0cm9uaWNvIjoiYWRtaW5AZ21haWwuY29tIn0.aULt5Q.U1PINOs1MzOaI0BR6igcadu57ng\n\nSi no solicitaste esto, ignora este mensaje.", "created_at": "2025-12-17T17:52:37Z"}
