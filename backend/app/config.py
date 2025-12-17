@@ -15,6 +15,19 @@ class BaseConfig:
         "DATABASE_URL",
         "mysql+pymysql://root:password@localhost:3306/micro_renta"
     )
+
+    # ✅ FIX Railway/MySQL: evita conexiones muertas del pool y timeouts al leer resultados
+    SQLALCHEMY_ENGINE_OPTIONS = {
+        "pool_pre_ping": True,
+        "pool_recycle": 280,
+        "pool_timeout": 30,
+        "connect_args": {
+            "connect_timeout": 10,
+            "read_timeout": 30,
+            "write_timeout": 30,
+        },
+    }
+
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
     JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY", "super-secret-key-change-this")
