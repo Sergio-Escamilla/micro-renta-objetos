@@ -4,10 +4,13 @@ from app.extensions import db
 class Articulo(db.Model):
     __tablename__ = "articulos"
 
-    # PK
+    # =========================
+    # Columnas reales en MySQL
+    # =========================
+
     id_articulo = db.Column(db.Integer, primary_key=True, autoincrement=True)
 
-    # FK real
+    # FK real en BD (ojo: en la BD es id_dueno, NO id_propietario)
     id_dueno = db.Column(
         db.Integer,
         db.ForeignKey("usuarios.id_usuario", ondelete="RESTRICT"),
@@ -23,7 +26,7 @@ class Articulo(db.Model):
     titulo = db.Column(db.String(150), nullable=False)
     descripcion = db.Column(db.Text, nullable=False)
 
-    # Precios REALES en BD
+    # Precios reales (BD)
     precio_por_hora = db.Column(db.Numeric(10, 2), nullable=True)
     precio_por_dia = db.Column(db.Numeric(10, 2), nullable=False)
     precio_por_semana = db.Column(db.Numeric(10, 2), nullable=True)
@@ -47,12 +50,32 @@ class Articulo(db.Model):
     creado_en = db.Column(db.DateTime)
     actualizado_en = db.Column(db.DateTime)
 
+    # =========================
     # Relaciones
-    dueno = db.relationship("Usuario", lazy="joined")
-    categoria = db.relationship("Categoria", back_populates="articulos")
+    # =========================
 
-    # --- COMPATIBILIDAD (NO COLUMNAS) ---
-    # Para que frontend / servicios legacy sigan funcionando
+    dueno = db.relationship(
+        "Usuario",
+        foreign_keys=[id_dueno],
+        lazy="joined",
+    )
+
+    categoria = db.relationship(
+        "Categoria",
+        back_populates="articulos",
+    )
+
+    imagenes = db.relationship(
+        "ArticuloImagen",
+        back_populates="articulo",
+        cascade="all, delete-orphan",
+    )
+
+    # =========================
+    # Compatibilidad (NO columnas)
+    # =========================
+
+    # Para código legacy / frontend
 
     @property
     def id_propietario(self):
@@ -81,4 +104,3 @@ class Articulo(db.Model):
     @property
     def fecha_actualizacion(self):
         return self.actualizado_en
-
