@@ -10,7 +10,7 @@ class Articulo(db.Model):
 
     id_articulo = db.Column(db.Integer, primary_key=True, autoincrement=True)
 
-    # FK real en BD (ojo: en la BD es id_dueno, NO id_propietario)
+    # FK real en BD
     id_dueno = db.Column(
         db.Integer,
         db.ForeignKey("usuarios.id_usuario", ondelete="RESTRICT"),
@@ -71,11 +71,16 @@ class Articulo(db.Model):
         cascade="all, delete-orphan",
     )
 
+    # ✅ IMPORTANTE: esto evita el crash del mapper
+    disponibilidades = db.relationship(
+        "DisponibilidadArticulo",
+        back_populates="articulo",
+        cascade="all, delete-orphan",
+    )
+
     # =========================
     # Compatibilidad (NO columnas)
     # =========================
-
-    # Para código legacy / frontend
 
     @property
     def id_propietario(self):
