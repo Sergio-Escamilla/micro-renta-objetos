@@ -1,5 +1,6 @@
 import pymysql
 pymysql.install_as_MySQLdb()
+import os
 from flask import Flask, send_from_directory
 from flask_cors import CORS
 from pathlib import Path
@@ -31,13 +32,19 @@ def create_app(config_class=DevConfig) -> Flask:
     uploads_articulos_dir.mkdir(parents=True, exist_ok=True)
     app.config["UPLOADS_ARTICULOS_DIR"] = str(uploads_articulos_dir)
 
-    # Habilitar CORS para el frontend Angular (localhost:4200)
-    # Si quieres permitir cualquier origen en desarrollo, cambia origins por "*"
-    CORS(
-        app,
-        resources={r"/api/*": {"origins": "http://localhost:4200"}},
-        supports_credentials=True,
-    )
+    # CORS
+    # - Dev (por defecto): http://localhost:4200
+    # - Prod (Railway): define CORS_ORIGINS (comma-separated) o FRONTEND_BASE_URL
+    raw_origins = os.getenv("CORS_ORIGINS")
+    if raw_origins:
+        origins = [o.strip() for o in raw_origins.split(",") if o.strip()]
+        if len(origins) == 1:
+            origins = origins[0]
+    else:
+        origins = app.config.get("FRONTEND_BASE_URL") or "http://localhost:4200"
+
+    supports_credentials = origins != "*"
+    CORS(app, resources={r"/api/*": {"origins": origins}}, supports_credentials=supports_credentials)
 
     # Inicializar extensiones
     db.init_app(app)
