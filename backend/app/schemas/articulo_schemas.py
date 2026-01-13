@@ -30,7 +30,6 @@ class ArticuloListadoSchema(ma.SQLAlchemyAutoSchema):
         exclude = (
             "descripcion",
             "id_articulo",
-            "monto_deposito",
         )
 
     # ✅ Tu API devuelve "id" pero internamente lee Articulo.id_articulo
@@ -47,7 +46,6 @@ class ArticuloListadoSchema(ma.SQLAlchemyAutoSchema):
     tarifa_por_dia = fields.Method("get_precio_renta_dia")
     tarifa_por_hora = fields.Method("get_precio_renta_hora")
     deposito_garantia = fields.Float(attribute="monto_deposito")
-    ciudad = ma.auto_field()
 
     propietario_nombre = fields.Method("get_propietario_nombre")
     propietario_correo = fields.Method("get_propietario_correo")
@@ -101,7 +99,6 @@ class ArticuloCreateSchema(ma.Schema):
     precio_renta_hora = fields.Float(required=False, allow_none=True)
     unidad_precio = fields.String(required=False, allow_none=True)
     deposito_garantia = fields.Float(required=False, allow_none=True)
-    ciudad = fields.String(required=False, allow_none=True)
     ubicacion_texto = fields.String(required=False, allow_none=True)
     urls_imagenes = fields.List(fields.String(), required=False)
 
@@ -137,7 +134,6 @@ class ArticuloDetalleSchema(ArticuloListadoSchema):
         # En el listado excluimos la descripción para ahorrar payload, pero en detalle sí se requiere.
         exclude = (
             "id_articulo",
-            "monto_deposito",
         )
 
     id_articulo = fields.Integer(attribute="id_articulo")

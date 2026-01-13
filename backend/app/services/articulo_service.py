@@ -37,7 +37,6 @@ def _articulo_to_dict(articulo: Articulo, incluir_propietario: bool = True) -> D
         "unidad_precio": articulo.unidad_precio,
         "monto_deposito": float(articulo.monto_deposito),
         "ubicacion_texto": articulo.ubicacion_texto,
-        "ciudad": articulo.ciudad,
         "estado": articulo.estado,
         "estado_publicacion": articulo.estado_publicacion,
         "es_destacado": articulo.es_destacado,
@@ -69,7 +68,6 @@ def crear_articulo(data: Dict[str, Any], id_propietario: int) -> Dict[str, Any]:
         unidad_precio=data.get("unidad_precio", "por_dia"),
         monto_deposito=data.get("monto_deposito", 0.0),
         ubicacion_texto=data.get("ubicacion_texto"),
-        ciudad=data.get("ciudad"),
         estado=data.get("estado"),
         estado_publicacion="borrador",  # luego se puede publicar
         es_destacado=data.get("es_destacado", False),
@@ -131,8 +129,6 @@ def actualizar_articulo(
         articulo.monto_deposito = data["monto_deposito"]
     if "ubicacion_texto" in data:
         articulo.ubicacion_texto = data["ubicacion_texto"]
-    if "ciudad" in data:
-        articulo.ciudad = data["ciudad"]
     if "estado" in data:
         articulo.estado = data["estado"]
     if "estado_publicacion" in data:
@@ -183,8 +179,6 @@ def listar_articulos_publicos(filtros: Dict[str, Any]) -> Dict[str, Any]:
 
     if filtros.get("id_categoria"):
         query = query.filter(Articulo.id_categoria == filtros["id_categoria"])
-    if filtros.get("ciudad"):
-        query = query.filter(Articulo.ciudad == filtros["ciudad"])
     if filtros.get("texto"):
         texto = f"%{filtros['texto']}%"
         query = query.filter(

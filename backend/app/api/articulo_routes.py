@@ -149,7 +149,6 @@ def crear_articulo():
         precio_base=selected_price,
         unidad_precio=selected_unit,
         monto_deposito=data.get("deposito_garantia") or 0,
-        ciudad=data.get("ciudad"),
         ubicacion_texto=data.get("ubicacion_texto"),
         estado="disponible",
         estado_publicacion="publicado",

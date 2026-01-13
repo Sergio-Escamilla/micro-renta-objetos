@@ -260,7 +260,6 @@ def listar_articulos_admin(search: str | None, page: int | str, per_page: int | 
 			{
 				"id_articulo": a.id_articulo,
 				"titulo": a.titulo,
-				"ciudad": a.ciudad,
 				"estado_publicacion": a.estado_publicacion,
 				"id_propietario": a.id_propietario,
 				"propietario": {
