@@ -5,7 +5,7 @@
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
-    "build": "ng build",
+    "build": "node ./scripts/apply-railway-env.mjs && ng build --configuration production",
     "test": "ng test",
     "lint": "ng lint"
   },
