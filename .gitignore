@@ -12,6 +12,8 @@ frontend/.env
 # Node / Angular
 frontend/node_modules/
 frontend/dist/
+frontend/.angular/
+.angular/
 **/node_modules/
 **/dist/
 
