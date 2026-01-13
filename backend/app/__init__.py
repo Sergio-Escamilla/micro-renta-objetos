@@ -1,6 +1,7 @@
 import pymysql
 pymysql.install_as_MySQLdb()
 import os
+from sqlalchemy import text
 from flask import Flask, send_from_directory
 from flask_cors import CORS
 from pathlib import Path
@@ -72,6 +73,20 @@ def create_app(config_class=DevConfig) -> Flask:
     @app.get("/api/health")
     def health_check():
         return {"status": "ok", "service": "micro-renta-backend"}
+
+    @app.get("/api/db-health")
+    def db_health_check():
+        try:
+            db.session.execute(text("SELECT 1"))
+            return {"status": "ok", "db": "ok"}, 200
+        except Exception as e:
+            # No exponer credenciales; solo el tipo de error y mensaje.
+            return {
+                "status": "error",
+                "db": "error",
+                "error_type": e.__class__.__name__,
+                "error": str(e),
+            }, 500
 
     @app.get("/uploads/articulos/<path:filename>")
     def servir_upload_articulo(filename: str):
